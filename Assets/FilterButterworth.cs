@@ -20,12 +20,12 @@ public class FilterButterworth
     /// <summary>
     /// Array of input values, latest are in front
     /// </summary>
-    private float[] inputHistory = new float[2];
+    private float[] inputHistory = new float[7];
 
     /// <summary>
     /// Array of output values, latest are in front
     /// </summary>
-    public float[] outputHistory = new float[3];
+    public float[] outputHistory = new float[7];
 
     public FilterButterworth(float frequency, int sampleRate, PassType passType, float resonance)
     {
@@ -63,10 +63,16 @@ public class FilterButterworth
 
     public void Update(float newInput)
     {
- 
+        int filterOrder = 7;
         float newOutput = a1 * newInput + a2 * this.inputHistory[0] + a3 * this.inputHistory[1] - b1 * this.outputHistory[0] - b2 * this.outputHistory[1];
+        // double newOutput1 = -0.0135*this.inputHistory[0]+0.0785*this.inputHistory[1] -0.2409*this.inputHistory[2] +0.3344*this.inputHistory[3] -0.2409*this.inputHistory[4] +0.0785*this.inputHistory[5] -0.0135*this.inputHistory[6];
+        // float newOutput = (float)newOutput1;
 
-        this.inputHistory[1] = this.inputHistory[0];
+        for (int i=(filterOrder-1); i>0; i--){
+            this.inputHistory[i] = this.inputHistory[i-1];
+        }
+
+        // this.inputHistory[1] = this.inputHistory[0];
         this.inputHistory[0] = newInput;
 
         this.outputHistory[2] = this.outputHistory[1];

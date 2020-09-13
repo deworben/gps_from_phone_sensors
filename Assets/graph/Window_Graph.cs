@@ -60,7 +60,7 @@ public class Window_Graph : MonoBehaviour {
     private void ShowGraph(List<float> valueList) {
         float graphHeight = graphContainer.sizeDelta.y;
         float yMaximum = 0.5f;
-        float xSize = 25f;
+        float xSize = 12.5f;
 
         GameObject lastCircleGameObject = null;
         for (int i = 0; i < valueList.Count; i++) {

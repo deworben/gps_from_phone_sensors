@@ -37,8 +37,11 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\AppManager.cs" />
+     <Compile Include="Assets\Compass.cs" />
      <Compile Include="Assets\DataLogger.cs" />
      <Compile Include="Assets\FilterButterworth.cs" />
+     <Compile Include="Assets\GyroFirstAttempt.cs" />
+     <Compile Include="Assets\Kalman.cs" />
      <Compile Include="Assets\Pedometer.cs" />
      <Compile Include="Assets\graph\Window_Graph.cs" />
     <Reference Include="UnityEngine">
