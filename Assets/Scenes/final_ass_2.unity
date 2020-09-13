@@ -220,7 +220,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 10, y: -125}
+  m_AnchoredPosition: {x: 10, y: -275}
   m_SizeDelta: {x: 400, y: 225}
   m_Pivot: {x: 0, y: 0}
 --- !u!1 &306705950
@@ -442,7 +442,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -210}
+  m_AnchoredPosition: {x: 0, y: -316}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &655672034
@@ -879,7 +879,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -207}
+  m_AnchoredPosition: {x: 0, y: -306}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &920204086
@@ -1080,7 +1080,17 @@ MonoBehaviour:
   stepCountViewer: {fileID: 682424408}
   startStopPedometer: {fileID: 590633837}
   initialise: 0
-  temp: 0
+  twoDX: 0
+  twoDY: 0
+  twoDZ: 0
+  u_projection_magnitude: 0
+  orthogonal_x: 0
+  orthogonal_y: 0
+  orthogonal_z: 0
+  compass_needle_x: 0
+  compass_needle_y: 0
+  compass_needle_z: 0
+  heading: 0
 --- !u!1 &1015254452
 GameObject:
   m_ObjectHideFlags: 0
@@ -1294,7 +1304,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -187}
+  m_AnchoredPosition: {x: 0, y: -293}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1328295246
@@ -1419,6 +1429,6 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 10, y: -18}
+  m_AnchoredPosition: {x: 10, y: -16}
   m_SizeDelta: {x: 400, y: 225}
   m_Pivot: {x: 0, y: 0}
