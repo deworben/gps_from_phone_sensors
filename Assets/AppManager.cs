@@ -19,41 +19,22 @@ public class AppManager : MonoBehaviour
     // public int temp = 0;
     private List<float> tempList;
 
-
+    //butterworth filter for pedometer
     public FilterButterworth fbwX = new FilterButterworth(15, 50, FilterButterworth.PassType.Highpass, (float)1.414);
-    
+    //filters to detect the direction of gravity
     public FilterButterworth findGX = new FilterButterworth((float)0.1, 50, FilterButterworth.PassType.Lowpass, (float)1.414);
     public FilterButterworth findGY = new FilterButterworth((float)0.1, 50, FilterButterworth.PassType.Lowpass, (float)1.414);
     public FilterButterworth findGZ = new FilterButterworth((float)0.1, 50, FilterButterworth.PassType.Lowpass, (float)1.414);
 
     public Pedometer pedometer = new Pedometer((float)0.05);
     public Gyro_first_attempt gyro_first_attempt = new Gyro_first_attempt((float)0.02);
-    public Compass compass = new Compass();
+    public AxisRotationAngles axisRotationAngles = new AxisRotationAngles();
     public Kalman kalmanX = new Kalman();
     public Kalman kalmanY = new Kalman();
     public Kalman kalmanZ = new Kalman();
+    public Heading heading = new Heading();
     public DataLogger dl = new DataLogger();
 
-                // projection of heading on 2-D plane (perpendicular to gravity)
-    public double twoDX;
-    public double twoDY;
-    public double twoDZ;
-
-    public double u_projection_magnitude;
-
-
-
-    public double orthogonal_x;
-    public double orthogonal_y;
-    public double orthogonal_z;
-
-    //Remove the component of u that is orthogonal to the plane
-    public double compass_needle_x;
-    public double compass_needle_y;
-    public double compass_needle_z;
-
-
-    public double heading;
 
     // Live graphs
     // public Window_Graph window = new Window_Graph();
@@ -77,14 +58,12 @@ public class AppManager : MonoBehaviour
     void FixedUpdate()
     {
         initialise += 1;
-        // double aboutX;
-        // double aboutY;
-        // double aboutZ;
-
+        
         // Enable the gyro and compass data
         Input.gyro.enabled = true;
         Input.compass.enabled = true;
         
+        // Wait till all the sensors have warmed up before using any readings
         if ((initialise > 2/0.02) && (startStopPedometer.text == "Stop")) {
 
             //Graphing update values
@@ -94,92 +73,76 @@ public class AppManager : MonoBehaviour
 
             
             // Log the time and acceleration data
-            string data = System.DateTime.Now.ToString();
+            string dl_data = System.DateTime.Now.ToString();
             string disp_data = "";
             
-
-            //Update filter
-            fbwX.Update(Input.acceleration.x);
-
-            // Find g
-            findGX.Update(Input.acceleration.x);
-            findGY.Update(Input.acceleration.y);
-            findGZ.Update(Input.acceleration.z);
-
-            //Update pedometer
-            pedometer.update(fbwX.Value);
-            //update the compass
-            compass.update_compass(Input.compass.rawVector.x, Input.compass.rawVector.y, Input.compass.rawVector.z);
-            // Update the gyro
-            gyro_first_attempt.update_orientation(Input.gyro.rotationRate.x, Input.gyro.rotationRate.y, Input.gyro.rotationRate.z);
-            // Initialise the gyro with compass values if need be
-            if(!gyro_first_attempt.isInitialised){
-                gyro_first_attempt.init_gyro_values(compass.aboutX, compass.aboutY, compass.aboutZ);
-                gyro_first_attempt.isInitialised = true;
-            }
-            //update kalmanX
-            kalmanX.update(gyro_first_attempt.orientationX, compass.aboutX);
-            kalmanY.update(gyro_first_attempt.orientationY, compass.aboutY);
-            kalmanZ.update(gyro_first_attempt.orientationZ, compass.aboutZ);
-            
+            this.updateAllClasses();
 
             // Display the data to GUI
             //  Pedometer data
             disp_data = "Currently at " + pedometer.numSteps + " steps \n" +
                 "V1: Dist = " + 0.8* pedometer.numSteps + " meters \n" + 
                 "V2: Dist = " + pedometer.distance_travelled + " meters \n" + 
-                "max_pulse_magnitude = " + pedometer.max_pulse_magnitude + " \n" + 
-                "kalmanX at = " + kalmanX.xhat + " \n" + 
-                "";
-            disp_data += string.Format("Gyro data: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n", Input.gyro.rotationRate.x, Input.gyro.rotationRate.y, Input.gyro.rotationRate.z);
-            disp_data += string.Format("Compass data: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n\n", Input.compass.rawVector.x, Input.compass.rawVector.y, Input.compass.rawVector.z);
-
-
-            //   Continuous angles data
-            disp_data += string.Format("Gyro angles: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n", gyro_first_attempt.orientationX, gyro_first_attempt.orientationY, gyro_first_attempt.orientationZ);
-            disp_data += string.Format("Compass angles: x: {0:F4}, y: {1:F4}, z: {2:F4}. \n", compass.aboutX, compass.aboutY, compass.aboutZ);
+                "max_pulse_magnitude = " + pedometer.max_pulse_magnitude + " \n\n";
             
-            // Create the unit vector with the same orientation as defined by kalman x,y,z
-            twoDX = Math.Cos(kalmanZ.xhat);
-            twoDY = Math.Sin(kalmanZ.xhat);
-            twoDZ = Math.Cos(kalmanX.xhat);
-
-            // Project this niggz onto a vactor perpendicular to the plane (gravity)
-            //kalman*gravity
-            u_projection_magnitude = (twoDX*findGX.outputHistory[0] + twoDY*findGY.outputHistory[0] + twoDZ*findGZ.outputHistory[0])/(Math.Pow(findGX.outputHistory[0], 2)+Math.Pow(findGY.outputHistory[0], 2)+Math.Pow(findGZ.outputHistory[0], 2));
-           //multiply gravity vector by u_projection_magnitude
-            orthogonal_x = u_projection_magnitude*findGX.outputHistory[0];
-            orthogonal_y = u_projection_magnitude*findGY.outputHistory[0];
-            orthogonal_z = u_projection_magnitude*findGZ.outputHistory[0];
-
-            //Remove the component of u that is orthogonal to the plane
-            compass_needle_x = twoDX - orthogonal_x;
-            compass_needle_y = twoDY - orthogonal_y;
-            compass_needle_z = twoDZ - orthogonal_z;
+            // Orientation data
+            disp_data += string.Format("Gyro data: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n", Input.gyro.rotationRate.x, Input.gyro.rotationRate.y, Input.gyro.rotationRate.z);
+            disp_data += string.Format("Gyro data: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n", Input.gyro.rotationRate.x, Input.gyro.rotationRate.y, Input.gyro.rotationRate.z);
+            disp_data += string.Format("Kalman data: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n\n", kalmanX.xhat, kalmanY.xhat, kalmanZ.xhat);
 
 
-            heading = Math.Atan2(compass_needle_y, compass_needle_x);
-            disp_data += string.Format("Compass at: {0:F4}, degrees!\n",heading);
+            // Continuous angles data
+            disp_data += string.Format("Gyro angles: x: {0:F4}, y: {1:F4}, z: {2:F4}.\n", gyro_first_attempt.orientationX, gyro_first_attempt.orientationY, gyro_first_attempt.orientationZ);
+            disp_data += string.Format("Compass angles: x: {0:F4}, y: {1:F4}, z: {2:F4}. \n", axisRotationAngles.aboutX, axisRotationAngles.aboutY, axisRotationAngles.aboutZ);
+
+            // Heading data            
+            disp_data += string.Format("Compass at: {0:F4}, degrees!\n",heading.current_heading);
             
             // Update text on the screen
             stepCountViewer.GetComponent<UnityEngine.UI.Text>().text = disp_data;
 
 
 
-            // In step to 1, 0 converter
-            // if (pedometer.inStep == false) {
-            //     temp = 0;
-            // }
-            // else {
-            //     temp = 1;
-            // }
-            
-            data += "," + Input.acceleration.x + "," + findGX.outputHistory[0]  + "," + findGY.outputHistory[0]  + ","+ Input.acceleration.y + "," + findGZ.outputHistory[0] + "," + Input.acceleration.z + ",";
-            // data += "," + gyro_first_attempt.orientationX + "," + gyro_first_attempt.orientationY + "," + gyro_first_attempt.orientationZ + "," + compass.aboutX + "," + compass.aboutY + "," + compass.aboutZ + ",";
-            // data += "," + Input.acceleration.x + "," + fbwX.outputHistory[0] + "," + temp + ",";
-            dl.AppendData(data);
+
+
+
+            // data logging data
+            dl_data += "," + Input.acceleration.x + "," + findGX.outputHistory[0]  + "," + findGY.outputHistory[0]  + ","+ Input.acceleration.y + "," + findGZ.outputHistory[0] + "," + Input.acceleration.z + ",";
+            // dl_data += "," + gyro_first_attempt.orientationX + "," + gyro_first_attempt.orientationY + "," + gyro_first_attempt.orientationZ + "," + compass.aboutX + "," + compass.aboutY + "," + compass.aboutZ + ",";
+            // dl_data += "," + Input.acceleration.x + "," + fbwX.outputHistory[0] + "," + temp + ",";
+            dl.AppendData(dl_data);
         }
 
+    }
+    public void updateAllClasses(){
+        
+        //Update filter
+        fbwX.Update(Input.acceleration.x);
+
+        // Updateusing the filter for acceleration data related to gravity finding in X, Y, Z 
+        findGX.Update(Input.acceleration.x);
+        findGY.Update(Input.acceleration.y);
+        findGZ.Update(Input.acceleration.z);
+
+        //Update pedometer
+        pedometer.update(fbwX.Value);
+        //update our angle of rotation from the magnetometer readings
+        axisRotationAngles.update_compass(Input.compass.rawVector.x, Input.compass.rawVector.y, Input.compass.rawVector.z);
+        // Update the gyro
+        gyro_first_attempt.update_orientation(Input.gyro.rotationRate.x, Input.gyro.rotationRate.y, Input.gyro.rotationRate.z);
+        // Initialise the gyro with compass values if need be
+        if(!gyro_first_attempt.isInitialised){
+            gyro_first_attempt.init_gyro_values(axisRotationAngles.aboutX, axisRotationAngles.aboutY, axisRotationAngles.aboutZ);
+            gyro_first_attempt.isInitialised = true;
+        }
+        //update kalmanX
+        kalmanX.update(gyro_first_attempt.orientationX, axisRotationAngles.aboutX);
+        kalmanY.update(gyro_first_attempt.orientationY, axisRotationAngles.aboutY);
+        kalmanZ.update(gyro_first_attempt.orientationZ, axisRotationAngles.aboutZ);
+        
+
+        //update heading
+        heading.updateHeading(kalmanZ.xhat, kalmanX.xhat, findGX.outputHistory[0], findGY.outputHistory[0], findGZ.outputHistory[0]);
     }
     public void startAndStopPedometer(){
         if(startStopPedometer.text == "Start"){
