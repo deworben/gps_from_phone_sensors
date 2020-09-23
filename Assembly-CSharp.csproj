@@ -40,7 +40,7 @@
      <Compile Include="Assets\AxisRotationAngles.cs" />
      <Compile Include="Assets\DataLogger.cs" />
      <Compile Include="Assets\FilterButterworth.cs" />
-     <Compile Include="Assets\GyroFirstAttempt.cs" />
+     <Compile Include="Assets\GyroIntegrator.cs" />
      <Compile Include="Assets\Heading.cs" />
      <Compile Include="Assets\Kalman.cs" />
      <Compile Include="Assets\Pedometer.cs" />

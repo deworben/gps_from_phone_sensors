@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine.UI;
+
 using System;
 using System.Linq;
 
@@ -27,9 +29,23 @@ public class Heading{
 
     public void updateHeading(double estimate_rotation_about_z, double estimate_rotation_about_x, double gravity_x, double gravity_y, double gravity_z){
         // Create the unit vector with the same orientation as defined by kalman x,y,z
-        twoDX = Math.Cos(estimate_rotation_about_z);
-        twoDY = Math.Sin(estimate_rotation_about_z);
-        twoDZ = Math.Cos(estimate_rotation_about_x);
+        // Old method (pre 19/09/20)
+        // twoDX = Math.Cos(estimate_rotation_about_z);
+        // twoDY = Math.Sin(estimate_rotation_about_z);
+        // twoDZ = Math.Cos(estimate_rotation_about_x);
+
+        twoDY = Math.Cos(-estimate_rotation_about_x);
+        twoDZ = twoDY * Math.Tan(-estimate_rotation_about_x);
+
+        if(estimate_rotation_about_z < 0){
+            twoDX = twoDY/( Math.Tan(-estimate_rotation_about_z) );
+        }else{
+            twoDX = twoDY/( Math.Tan(-estimate_rotation_about_z - (2*Math.PI) ) );
+        }
+        
+
+
+
 
         // Project the north vector onto a vector perpendicular to the plane (gravity)
         //kalmanNorthPosition*gravity
@@ -43,7 +59,11 @@ public class Heading{
         compass_needle_x = twoDX - orthogonal_x;
         compass_needle_y = twoDY - orthogonal_y;
         compass_needle_z = twoDZ - orthogonal_z;
-        current_heading = Math.Atan2(compass_needle_y, compass_needle_x);
+        current_heading = Math.Atan2(compass_needle_x, compass_needle_y);
+
+        if (current_heading<0){
+            current_heading = current_heading + 2*Math.PI;
+        }
 
 
 

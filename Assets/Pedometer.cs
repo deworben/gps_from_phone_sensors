@@ -13,6 +13,7 @@ public class Pedometer
     public int numSteps = 0;
     public float distance_travelled = 0;
     public float max_pulse_magnitude = 0;
+    public float dist_travelled_this_step = 0;
 
     public Pedometer(float threshold) {
         this.threshold = threshold;
@@ -28,6 +29,9 @@ public class Pedometer
     }
 
     public void update(float value) {
+
+        //Assume no distance has been travelled this step
+        dist_travelled_this_step = 0;
         
         value_history[12] = value_history[11];
         value_history[11] = value_history[10];
@@ -67,7 +71,7 @@ public class Pedometer
         Array.ForEach(this.step_flag_memory, i => sum += i);
         //Debug.Log(sum);
 
-        //if sum>2.9 (there's at least 1 threshold breach in the last 3 timesteps,
+        //if sum>4.9 (there's at least 1 threshold breach in the last 3 timesteps,
         //then we're mid-step. 
         if (sum > 4.9)
         {
@@ -75,10 +79,11 @@ public class Pedometer
             if (this.inStep == false)
             {
                 this.numSteps++;
+                dist_travelled_this_step = (float)((1.5)*this.max_pulse_magnitude + 0.35);
                 //Debug.Log("Stepped!:\n");
                 //Debug.Log("Number of steps = " + this.numSteps);
                 //Debug.Log("\n----------------------------\n"); 2.1...0.05
-                this.distance_travelled = (float)(this.distance_travelled + (1.5)*this.max_pulse_magnitude + 0.35);
+                this.distance_travelled = (float)(this.distance_travelled + dist_travelled_this_step);
                 max_pulse_magnitude = 0;
             }
             this.inStep = true;
