@@ -19,7 +19,7 @@ public class Heading{
     public double compass_needle_x;
     public double compass_needle_y;
     public double compass_needle_z;
-    public double current_heading;
+    public double current_heading = 0;
 
     public Heading(){
         //just so that the constructor has something to do

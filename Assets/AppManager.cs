@@ -102,11 +102,11 @@ public class AppManager : MonoBehaviour
   
             // Heading data            
             disp_data += string.Format("Heading at: {0:F4}, degrees, filteredHeading @{1:F4}\n",(float)(heading.current_heading*(180/Math.PI)), (float)(filteredHeading.outputHistory[0]*(180/Math.PI)));
+            // Update compass arrow
             compass_arrow.Rotate( new Vector3( 0, 0, (float)(heading.current_heading*(180/Math.PI) - compass_arrow.eulerAngles.z) ) );
             
-            //update compass arrow
-            // disp_data += string.Format("heading to go to: {0:F4}, heading currently at: {1:F4}, !\n",(float)(heading.current_heading*(180/Math.PI)), (float)compass_arrow.eulerAngles.z);
-            
+
+
             // Update text on the screen
             stepCountViewer.GetComponent<UnityEngine.UI.Text>().text = disp_data;
 
@@ -116,7 +116,7 @@ public class AppManager : MonoBehaviour
 
             // data logging data
             // dl_data += "," + pedometer.dist_travelled_this_step + "," + heading.current_heading + ",";
-            dl_data += "," + pedometer.dist_travelled_this_step + "," + filteredHeading.outputHistory[0] + ",";
+            dl_data += "," + pedometer.dist_travelled_this_step + "," + heading.current_heading + "," + filteredHeading.outputHistory[0] + "," + Input.gyro.rotationRate.z + "," + gyroIntegrator.orientationZ + "," + Input.compass.rawVector.z + "," + kalmanZ.xhat + ",";
             
             dl.AppendData(dl_data);
         }
@@ -142,6 +142,14 @@ public class AppManager : MonoBehaviour
         if(!gyroIntegrator.isInitialised){
             gyroIntegrator.init_gyro_values(magnetoAxisRotationAngles.aboutX, magnetoAxisRotationAngles.aboutY, magnetoAxisRotationAngles.aboutZ);
             gyroIntegrator.isInitialised = true;
+
+            // Initialise the Kalman values
+            kalmanX.init_kalman_values(magnetoAxisRotationAngles.aboutX);
+            kalmanY.init_kalman_values(magnetoAxisRotationAngles.aboutY);
+            kalmanZ.init_kalman_values(magnetoAxisRotationAngles.aboutZ);
+            kalmanX.isInitialised = true;
+            kalmanY.isInitialised = true;
+            kalmanZ.isInitialised = true;
         }
         //update kalman filter in x, y, z using raw gyro and 
         kalmanX.update(Input.gyro.rotationRate.x, magnetoAxisRotationAngles.aboutX);
